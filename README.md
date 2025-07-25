@@ -3,7 +3,7 @@
 Examen Final - Yoel Yonatan Huaraca
 
 ## Descripción
-Aplicación web para gestionar tareas pendientes, desarrollada como examen final. Permite agregar, eliminar, editar y marcar tareas como completadas, con un diseño moderno, responsivo y profesional.
+Aplicación web para gestionar tareas pendientes, Permite agregar, eliminar, editar y marcar tareas como completadas, con un diseño moderno, responsivo y profesional.
 
 ## Tecnologías utilizadas
 - HTML5
@@ -53,4 +53,4 @@ Aplicación web para gestionar tareas pendientes, desarrollada como examen final
 
 ---
 
-> Proyecto realizado para el examen final de Desarrollo Web. Cumple con todos los requisitos solicitados: uso de HTML, CSS, JavaScript, Bootstrap, Vue.js, diseño responsivo, footer con datos y entrega en GitHub. 
+> Proyecto de Desarrollo Web. Cumple con todos los requisitos solicitados: uso de HTML, CSS, JavaScript, Bootstrap, Vue.js, diseño responsivo, footer con datos y entrega en GitHub. 
