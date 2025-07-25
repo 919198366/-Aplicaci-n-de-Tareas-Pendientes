@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Tareas Pendientes - Yoel Yonatan Huaraca</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts llamativas -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body, html {
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        h1, h2, h3, .display-5 {
+            font-family: 'Pacifico', cursive;
+            letter-spacing: 0.04em;
+            color: #6f42c1;
+            text-shadow: 0 2px 8px rgba(111,66,193,0.08);
+        }
+        .navbar-brand, .logo-todo {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.2rem;
+            color: #ff416c !important;
+            letter-spacing: 0.08em;
+            text-shadow: 0 2px 12px rgba(255,65,108,0.12);
+        }
+        .lead, .fw-bold, .fw-bolder {
+            color: #0d6efd;
+        }
+        .fa-list-check, .fa-calendar-check, .fa-user-circle, .fa-envelope, .fa-star, .fa-rocket {
+            color: #ff416c;
+            font-size: 2.2rem;
+            margin-right: 0.5rem;
+            filter: drop-shadow(0 2px 8px #ff416c33);
+        }
+        .fa-github, .fa-linkedin, .fa-facebook {
+            font-size: 2rem;
+        }
+        .badge-prioridad {
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 1.05em;
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, #ff416c 0%, #0d6efd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body :class="{'dark-mode': temaOscuro}">
+    <div id="app">
+        <!-- Header y navegación SPA -->
+        <header class="bg-primary text-white py-3 mb-4 shadow">
+            <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <span class="logo-todo"><i class="fa-solid fa-list-check"></i>To-Do Pro</span>
+                <nav>
+                    <a href="#" class="text-white me-3" :class="{ 'fw-bold text-warning': pagina==='inicio' }" @click.prevent="pagina='inicio'">Inicio</a>
+                    <a href="#" class="text-white me-3" :class="{ 'fw-bold text-warning': pagina==='tareas' }" @click.prevent="pagina='tareas'">Tareas</a>
+                    <a href="#" class="text-white me-3" :class="{ 'fw-bold text-warning': pagina==='calendario' }" @click.prevent="pagina='calendario'">Calendario</a>
+                    <a href="#" class="text-white me-3" :class="{ 'fw-bold text-warning': pagina==='estadisticas' }" @click.prevent="pagina='estadisticas'">Estadísticas</a>
+                    <a href="#" class="text-white me-3" :class="{ 'fw-bold text-warning': pagina==='sobre' }" @click.prevent="pagina='sobre'">Sobre</a>
+                    <a href="#" class="text-white" :class="{ 'fw-bold text-warning': pagina==='contacto' }" @click.prevent="pagina='contacto'">Contacto</a>
+                </nav>
+            </div>
+        </header>
+        <main class="container py-4">
+            <transition name="fade" mode="out-in">
+                <section v-if="pagina==='inicio'" key="inicio" class="overlay mb-4 animate__animated animate__fadeIn">
+                    <h1 class="display-5 mb-3 text-gradient"><i class="fa-solid fa-rocket"></i>Bienvenido a tu To-Do List Pro</h1>
+                    <p class="lead">Organiza tu vida, tus estudios y tu trabajo con la aplicación de tareas más <span class="fw-bolder text-gradient">completa y moderna</span>. ¡Gestiona tus pendientes, adjunta imágenes, usa prioridades, fechas, subtareas y mucho más!</p>
+                    <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80" alt="Organización" class="img-fluid rounded shadow" style="max-width:400px;">
+                </section>
+                <section v-else-if="pagina==='tareas'" key="tareas" class="overlay animate__animated animate__fadeIn">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h1 class="text-gradient mb-0"><i class="fa-solid fa-calendar-check"></i>Lista de Tareas</h1>
+                        <button class="btn btn-outline-dark" @click="alternarTema" :aria-label="temaOscuro ? 'Tema claro' : 'Tema oscuro'">
+                            <i :class="temaOscuro ? 'fa fa-sun' : 'fa fa-moon'"></i>
+                        </button>
+                    </div>
+                    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                        <input v-model="busqueda" class="form-control form-control-sm w-auto" placeholder="Buscar tarea...">
+                        <select v-model="orden" class="form-select form-select-sm w-auto">
+                            <option value="fecha">Ordenar por fecha</option>
+                            <option value="prioridad">Ordenar por prioridad</option>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm" :class="{'active': filtro==='todas'}" @click="cambiarFiltro('todas')">Todas</button>
+                        <button class="btn btn-outline-success btn-sm" :class="{'active': filtro==='completadas'}" @click="cambiarFiltro('completadas')">Completadas</button>
+                        <button class="btn btn-outline-warning btn-sm" :class="{'active': filtro==='pendientes'}" @click="cambiarFiltro('pendientes')">Pendientes</button>
+                        <span class="ms-auto small">
+                            Total: <strong>{{ total }}</strong> |
+                            Completadas: <strong>{{ completadas }}</strong> |
+                            Pendientes: <strong>{{ pendientes }}</strong>
+                        </span>
+                        <button class="btn btn-danger btn-sm ms-2" @click="vaciarLista"><i class="fa fa-trash"></i> Vaciar lista</button>
+                    </div>
+                    <form @submit.prevent="agregarTarea" class="mb-3 row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <input v-model="nuevaTarea" type="text" class="form-control" placeholder="Título de la tarea" required>
+                        </div>
+                        <div class="col-md-2">
+                            <select v-model="nuevaPrioridad" class="form-select">
+                                <option value="alta">Alta</option>
+                                <option value="media">Media</option>
+                                <option value="baja">Baja</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input v-model="nuevaFecha" type="date" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <input v-model="nuevaDescripcion" type="text" class="form-control" placeholder="Descripción">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="file" @change="subirImagen" accept="image/*" class="form-control">
+                        </div>
+                        <div class="col-12 mt-2">
+                            <input v-model="nuevaSubtarea" type="text" class="form-control d-inline w-auto" placeholder="Agregar subtarea" @keyup.enter="agregarSubtarea">
+                            <button type="button" class="btn btn-secondary btn-sm ms-2" @click="agregarSubtarea">Añadir subtarea</button>
+                            <span v-for="(s, idx) in subtareasTemp" :key="idx" class="badge bg-info text-dark ms-1">
+                                {{ s }} <i class="fa fa-times ms-1" @click="eliminarSubtareaTemp(idx)" style="cursor:pointer;"></i>
+                            </span>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i> Agregar tarea</button>
+                        </div>
+                    </form>
+                    <div v-if="notificacion" class="alert alert-info py-2 animate__animated animate__fadeIn mb-2">{{ notificacion }}</div>
+                    <transition-group name="fade" tag="ul" class="list-group mb-3">
+                        <li v-for="(tarea, index) in tareasFiltradas" :key="tarea.id" class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center animate__animated animate__fadeIn mb-3 p-3 shadow-sm" :class="{'list-group-item-success': tarea.completada}">
+                            <div class="d-flex align-items-center w-100 mb-2 mb-md-0">
+                                <img v-if="tarea.imagen" :src="tarea.imagen" alt="img tarea" class="rounded-circle border border-2 me-3" style="width:60px;height:60px;object-fit:cover;">
+                                <img v-else src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=100&q=80" alt="img tarea" class="rounded-circle border border-2 me-3" style="width:60px;height:60px;object-fit:cover;">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" v-model="tarea.completada" @change="completarTarea(index)">
+                                        <span v-if="editandoIndex !== index" :style="{textDecoration: tarea.completada ? 'line-through' : 'none'}" class="fw-bold">{{ tarea.texto }}</span>
+                                        <input v-else v-model="textoEditado" @keyup.enter="guardarEdicion(index)" class="form-control form-control-sm me-2" />
+                                    </div>
+                                    <div class="small text-muted">
+                                        <span v-if="tarea.fecha">Fecha: <span :class="{'text-danger': tarea.fecha && new Date(tarea.fecha)<new Date()}" >{{ tarea.fecha }}</span></span>
+                                        <span class="ms-2">Prioridad: <span :class="{'text-danger': tarea.prioridad==='alta', 'text-warning': tarea.prioridad==='media', 'text-success': tarea.prioridad==='baja'}">{{ tarea.prioridad }}</span></span>
+                                    </div>
+                                    <div v-if="tarea.descripcion" class="small mt-1">{{ tarea.descripcion }}</div>
+                                    <div v-if="tarea.subtareas && tarea.subtareas.length" class="mt-1">
+                                        <span class="fw-bold small">Subtareas:</span>
+                                        <span v-for="(sub, subIdx) in tarea.subtareas" :key="subIdx" class="badge bg-light text-dark ms-1" :class="{'text-decoration-line-through bg-success text-white': sub.completada}" @click="completarSubtarea(index, subIdx)" style="cursor:pointer;">{{ sub.texto }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 mt-md-0">
+                                <button class="btn btn-success btn-sm me-1" @click="completarTarea(index)" v-if="!tarea.completada" :aria-label="'Completar tarea ' + tarea.texto"><i class="fa fa-check"></i></button>
+                                <button class="btn btn-secondary btn-sm me-1" disabled v-else><i class="fa fa-check-double"></i></button>
+                                <button class="btn btn-warning btn-sm me-1" @click="editarTarea(index)" v-if="editandoIndex !== index"><i class="fa fa-pen"></i></button>
+                                <button class="btn btn-primary btn-sm me-1" @click="guardarEdicion(index)" v-if="editandoIndex === index"><i class="fa fa-save"></i></button>
+                                <button class="btn btn-secondary btn-sm me-1" @click="cancelarEdicion" v-if="editandoIndex === index"><i class="fa fa-times"></i></button>
+                                <button class="btn btn-danger btn-sm" @click="confirmarEliminacion(index)" :aria-label="'Eliminar tarea ' + tarea.texto"><i class="fa fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </transition-group>
+                    <div v-if="tareasFiltradas.length === 0" class="text-center text-muted">No hay tareas para mostrar.</div>
+                </section>
+                <section v-else-if="pagina==='calendario'" key="calendario" class="overlay animate__animated animate__fadeIn">
+                    <h2 class="text-gradient mb-4"><i class="fa-solid fa-calendar-days"></i> Calendario de Tareas</h2>
+                    <div id="calendar" style="background:rgba(255,255,255,0.9); border-radius:1.2rem; box-shadow:0 2px 16px #0001; padding:1rem;"></div>
+                </section>
+                <section v-else-if="pagina==='estadisticas'" key="estadisticas" class="overlay animate__animated animate__fadeIn">
+                    <h2 class="text-gradient mb-4"><i class="fa-solid fa-chart-pie"></i> Estadísticas</h2>
+                    <canvas id="statsChart" height="120"></canvas>
+                </section>
+                <section v-else-if="pagina==='sobre'" key="sobre" class="overlay animate__animated animate__fadeIn">
+                    <h2 class="text-gradient"><i class="fa-solid fa-user-circle"></i>Sobre la aplicación</h2>
+                    <p class="lead">Esta aplicación fue desarrollada por <span class="fw-bolder text-gradient">Yoel Yonatan Huaraca</span> como examen final para el curso de Desarrollo Web. Incluye todas las funciones modernas de una To-Do List profesional: imágenes, prioridades, fechas, subtareas, modo oscuro, responsive, y más.</p>
+                    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80" alt="Sobre" class="img-fluid rounded shadow" style="max-width:400px;">
+                </section>
+                <section v-else-if="pagina==='contacto'" key="contacto" class="overlay animate__animated animate__fadeIn">
+                    <h2 class="text-gradient"><i class="fa-solid fa-envelope"></i>Contacto</h2>
+                    <p class="lead">Puedes contactarme en <a href="mailto:yoel.huaraca@email.com">yoel.huaraca@email.com</a> o a través de mis redes sociales:</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Yoel+Yonatan+Huaraca&background=0d6efd&color=fff&size=80" alt="Avatar" class="rounded-circle border border-2 me-3" style="width:80px;height:80px;">
+                        <div>
+                            <div class="fw-bolder text-gradient">Yoel Yonatan Huaraca</div>
+                            <div>5° ciclo | Julio 2025</div>
+                            <div>Profesor: Cristian Figueroa</div>
+                        </div>
+                    </div>
+                    <a href="#" class="text-dark me-3" target="_blank"><i class="fab fa-github fa-2x"></i></a>
+                    <a href="#" class="text-primary me-3" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
+                    <a href="#" class="text-info" target="_blank"><i class="fab fa-facebook fa-2x"></i></a>
+                </section>
+            </transition>
+            <!-- Modal de confirmación para eliminar SIEMPRE presente en el DOM -->
+            <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true" ref="modal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalEliminarLabel">Confirmar eliminación</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" @click="cerrarModalEliminar"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas eliminar esta tarea?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="cerrarModalEliminar">Cancelar</button>
+                            <button type="button" class="btn btn-danger" @click="eliminarTarea(confirmarIndex)">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="footer mt-5 py-3 bg-dark text-white text-center">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <img src="https://ui-avatars.com/api/?name=Yoel+Yonatan+Huaraca&background=0d6efd&color=fff&size=64" alt="Avatar" class="rounded-circle border border-2">
+                    </div>
+                    <div class="col-md-7 text-md-start mb-2 mb-md-0">
+                        <span class="fw-bolder text-gradient">Yoel Yonatan Huaraca</span> | 5° ciclo | Julio 2025<br>
+                        <span>Correo: <a href="mailto:yoel.huaraca@email.com" class="text-white">yoel.huaraca@email.com</a></span><br>
+                        <span>Profesor: Cristian Figueroa</span><br>
+                        <span class="small">Desarrollador web | Lima, Perú</span>
+                    </div>
+                    <div class="col-md-3 text-md-end">
+                        <a href="#" class="text-white me-3" target="_blank"><i class="fab fa-github fa-lg"></i></a>
+                        <a href="#" class="text-white me-3" target="_blank"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="text-white" target="_blank"><i class="fab fa-facebook fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Animate.css para animaciones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="app.js"></script>
+    <!-- FullCalendar y Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+</body>
+</html> 
